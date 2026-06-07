@@ -1,290 +1,23 @@
 # Biological Motion Detection Task
 
-## Overview
+This repository contains a MATLAB implementation of a biological motion detection task inspired by Szymanek, Senderecka, & Hohol (2026), *I see moving people: Expectations drive detection of biological motion in noisy point-light displays*, Psychonomic Bulletin & Review. The stimuli are based on the point-light biological motion displays originally used by van Elk (2013) and later used in that task.
 
-This repository contains a MATLAB implementation of a biological motion detection task inspired by:
+The implementation includes two conditions:
 
-> Szymanek, A., Senderecka, M., & Hohol, M. (2026). *I see moving people: Expectations drive detection of biological motion in noisy point-light displays*. Psychonomic Bulletin & Review.
+1. **Individual condition**: one participant performs the task alone.
+2. **Shared condition**: two participants perform the same task simultaneously on two interconnected laptops.
 
-The task is designed to investigate how observers detect biological motion embedded within varying levels of visual noise. In our implementation, the task is intended to be used both as a standalone perceptual experiment and as part of a broader investigation examining how perceptual processing differs when participants perform a task individually versus in the presence of another person performing the same task.
+No Psychtoolbox is required.
 
-The current version implements the **individual condition**. A future version will include a **shared condition**, analogous to the implementation developed for the line bisection task, in which two participants perform the task simultaneously on interconnected computers.
+## Stimuli
 
----
-
-# Experimental Rationale
-
-Biological motion perception refers to the remarkable ability of humans to recognize animate movement from sparse visual information, such as point-light displays representing the joints of a moving person.
-
-The task presents participants with short animations containing either:
-
-- An intact point-light walker (biological motion present), or
-- A scrambled version of the same motion (biological motion absent).
-
-The animations are embedded within varying amounts of visual noise consisting of additional moving dots.
-
-Participants must decide whether they perceived a human walker.
-
-Performance is analysed using Signal Detection Theory (SDT), allowing the estimation of:
-
-- Hit rate
-- False alarm rate
-- Sensitivity (d′)
-- Response bias (criterion c)
-
----
-
-# Stimuli
-
-The stimuli are based on the biological motion displays used by:
-
-> van Elk (2013)
-
-and subsequently employed by:
-
-> Szymanek, Senderecka, & Hohol (2026)
-
-The original study used point-light displays depicting a walking human figure embedded within varying levels of visual noise.
-
-In our implementation, each stimulus consists of a short video (~2 seconds duration) showing either:
-
-- An intact point-light walker (**walker present**)
-- A scrambled biological motion control stimulus (**walker absent**)
-
-The walker can appear in different horizontal positions and move in different directions.
-
----
-
-# Stimulus Naming Convention
-
-The stimulus filenames follow a systematic naming convention:
-
-Example:
-
-```text
-U48R-10.mp4
-```
-
-Meaning:
-
-| Component | Meaning |
-|------------|------------|
-| U | Unscrambled (walker present) |
-| S | Scrambled (walker absent) |
-| 24, 48, 96, 192 | Number of distractor dots |
-| L | Walker moves left |
-| R | Walker moves right |
-| -20, -10, 0, 10, 20 | Horizontal position |
-
-Examples:
-
-```text
-U24L0.mp4
-```
-
-Walker present, 24 distractor dots, moving left, centered.
-
-```text
-S192R20.mp4
-```
-
-Scrambled control stimulus, 192 distractor dots, moving right, shifted to the right.
-
----
-
-# Experimental Design
-
-The main experiment uses a full factorial design:
-
-| Factor | Levels |
-|----------|----------|
-| Signal | Walker / Scrambled |
-| Noise | 24, 48, 96, 192 |
-| Direction | Left / Right |
-| Position | -20, -10, 0, 10, 20 |
-
-This results in:
-
-```text
-2 × 4 × 2 × 5 = 80 unique stimuli
-```
-
-Each stimulus is presented twice:
-
-```text
-80 × 2 = 160 trials
-```
-
-A fixed pseudorandom order is used for all participants.
-
----
-
-# Trial Structure
-
-Each trial consists of:
-
-## 1. Fixation
-
-A central fixation cross is presented for:
-
-```text
-500 ms
-```
-
-## 2. Stimulus Presentation
-
-A biological motion animation is displayed.
-
-The video is played exactly as stored.
-
-Typical duration:
-
-```text
-~2000 ms
-```
-
-## 3. Response Screen
-
-Participants are asked:
-
-```text
-Did you see a human walker?
-```
-
-Response keys:
-
-```text
-Y = Yes (walker present)
-N = No (walker absent)
-```
-
-Participants are encouraged to respond even if uncertain.
-
-Response time is currently unlimited.
-
-## 4. Inter-Trial Interval
-
-A blank screen is presented for a short interval:
-
-```text
-300–500 ms
-```
-
-before the next trial begins.
-
----
-
-# Practice Block
-
-Before the main experiment participants complete:
-
-```text
-10 practice trials
-```
-
-Practice trials preferentially use lower noise levels.
-
-Feedback is provided after each response:
-
-```text
-Correct
-```
-
-or
-
-```text
-Incorrect
-```
-
-No feedback is provided during the main experiment.
-
----
-
-# Data Recording
-
-Data are saved immediately after every trial.
-
-Each row contains:
-
-| Variable | Description |
-|------------|------------|
-| participantID | Participant identifier |
-| trial | Trial number |
-| filename | Stimulus filename |
-| signalLabel | Walker or scrambled |
-| signalPresent | 1 = walker, 0 = scrambled |
-| response | yes / no |
-| responseWalker | 1 = yes, 0 = no |
-| correct | Accuracy |
-| hit | Signal detected correctly |
-| falseAlarm | Walker reported when absent |
-| miss | Walker missed |
-| correctRejection | Correct "no" response |
-| noise | Noise level |
-| direction | Left / right |
-| position | Horizontal position |
-| RT | Response time |
-| timestamp | Date and time |
-
-Output files are saved in:
-
-```text
-data/
-```
-
----
-
-# Signal Detection Analysis
-
-The repository includes a function:
-
-```matlab
-bm_compute_sdt
-```
-
-which calculates Signal Detection Theory measures using the loglinear correction proposed by:
-
-> Hautus (1995)
-
-The following measures are computed:
-
-### Hit Rate
-
-```text
-Hits / Signal Trials
-```
-
-### False Alarm Rate
-
-```text
-False Alarms / Noise Trials
-```
-
-### Sensitivity (d′)
-
-```text
-d′ = z(Hit Rate) − z(False Alarm Rate)
-```
-
-### Response Bias (Criterion c)
-
-```text
-c = −0.5 × [z(Hit Rate) + z(False Alarm Rate)]
-```
-
-Higher values of c indicate a more conservative response strategy.
-
----
-
-# Installation
-
-Place all stimulus videos in:
+Place all video files in:
 
 ```text
 stimuli/
 ```
 
-If the original AVI files use unsupported codecs (e.g., Cinepak/cvid), convert them to MP4:
+If MATLAB cannot read the original `.avi` files because they use an unsupported codec such as Cinepak/cvid, convert them to `.mp4` using:
 
 ```matlab
 bm_convert_stimuli_to_mp4
@@ -296,80 +29,241 @@ The converted files will be stored in:
 stimuli_mp4/
 ```
 
----
+The task automatically prefers `stimuli_mp4/` if it exists.
 
-# Creating the Stimulus Table
+## Stimulus naming convention
 
-Generate the stimulus table:
+Example:
+
+```text
+U48R-10.mp4
+```
+
+| Component | Meaning |
+|---|---|
+| `U` | unscrambled / intact walker / signal present |
+| `S` | scrambled / no walker / signal absent |
+| `24, 48, 96, 192` | number of distractor dots |
+| `L` | leftward movement |
+| `R` | rightward movement |
+| `-20, -10, 0, 10, 20` | horizontal position |
+
+## Design
+
+The main task uses:
+
+```text
+2 signal conditions × 4 noise levels × 2 directions × 5 positions = 80 unique stimuli
+```
+
+Each stimulus is presented twice:
+
+```text
+80 × 2 = 160 trials
+```
+
+Noise level `12`, if present, is used preferentially for practice.
+
+## Trial structure
+
+Each trial consists of:
+
+1. Fixation cross: 500 ms
+2. Video animation: played exactly as stored, typically about 2000 ms
+3. Response screen
+4. Participant response
+5. Inter-trial interval: random 300–500 ms
+
+Response keys:
+
+```text
+Y = Yes, I saw a human walker
+N = No, I did not see a human walker
+ESC = abort experiment
+```
+
+Response time is currently unlimited.
+
+## Creating the MATLAB files
+
+Run:
 
 ```matlab
-make_bm_stimulus_table
+create_biological_motion_files_v1
 ```
 
 This creates:
 
 ```text
-stimuli.csv
+make_bm_stimulus_table.m
+make_bm_trial_order.m
+run_biological_motion_individual.m
+run_biological_motion_shared_host.m
+run_biological_motion_shared_client.m
+bm_play_video_trial.m
+bm_get_response.m
+bm_wait_for_space.m
+bm_save_row.m
+bm_compute_sdt.m
+bm_convert_stimuli_to_mp4.m
 ```
 
----
+## Convert AVI files if needed
 
-# Creating the Trial Order
+Install FFmpeg if necessary:
 
-Generate the fixed pseudorandom order:
+```bat
+winget install -e --id Gyan.FFmpeg
+```
+
+Then run:
 
 ```matlab
+bm_convert_stimuli_to_mp4
+```
+
+After conversion, regenerate the stimulus table and trial order:
+
+```matlab
+delete('stimuli.csv')
+delete('bm_trial_order.mat')
+delete('bm_trial_order.csv')
+
+make_bm_stimulus_table
 make_bm_trial_order
 ```
 
-This creates:
-
-```text
-bm_trial_order.mat
-bm_trial_order.csv
-```
-
----
-
-# Running the Experiment
-
-Run the individual condition:
+## Run the individual condition
 
 ```matlab
 run_biological_motion_individual('participant001')
 ```
 
-or
+Data are saved in:
 
-```matlab
-run_biological_motion_individual
+```text
+data/participant001_biological_motion_individual.csv
 ```
 
-and enter the participant identifier when prompted.
+## Run the shared condition
 
----
+In the shared condition, two participants sit side by side and complete the same task simultaneously on separate laptops. Both computers present the same animation on every trial. Participants respond privately and cannot see each other’s responses. After both have responded, the next trial is locked until either participant presses the spacebar. The system records who initiated each trial.
 
-# Future Shared Condition
+One computer is the **HOST** and the other is the **CLIENT**.
 
-A future version will implement a shared condition analogous to the line bisection task.
+### Ethernet setup
 
-In the shared condition:
+Use an Ethernet cable to connect both laptops. Disable Wi-Fi if possible.
 
-- Two participants will perform the task simultaneously.
-- Both computers will display exactly the same stimulus at exactly the same moment.
-- Participants will respond privately.
-- Neither participant will see the other's response.
-- Progression to the next trial will require both participants to respond.
-- The temporal structure of the experiment will therefore require minimal interpersonal coordination while preserving independent decision-making.
+Set static IPv4 addresses:
 
-This manipulation will allow investigation of whether the mere fact of sharing a perceptual environment with another observer influences biological motion detection, sensitivity, or response bias.
+HOST:
 
----
+```text
+IP address: 192.168.10.1
+Subnet mask: 255.255.255.0
+Gateway: leave empty
+```
 
-# References
+CLIENT:
+
+```text
+IP address: 192.168.10.2
+Subnet mask: 255.255.255.0
+Gateway: leave empty
+```
+
+Test from CLIENT:
+
+```bat
+ping 192.168.10.1
+```
+
+### Start HOST first
+
+```matlab
+run_biological_motion_shared_host('dyad001','dyad001_A',50000)
+```
+
+### Start CLIENT second
+
+```matlab
+run_biological_motion_shared_client('dyad001','dyad001_B','192.168.10.1',50000)
+```
+
+The port must match on both computers.
+
+## Output files
+
+HOST saves:
+
+```text
+data/dyad001_A_biological_motion_shared.csv
+data/dyad001_biological_motion_shared_sync.csv
+```
+
+CLIENT saves:
+
+```text
+data/dyad001_B_biological_motion_shared.csv
+```
+
+## Recorded variables
+
+Each participant file contains:
+
+| Variable | Description |
+|---|---|
+| participantID | participant identifier |
+| condition | individual or shared |
+| trial | trial number |
+| filename | stimulus filename |
+| signalLabel | walker or scrambled |
+| signalPresent | 1 = walker present, 0 = scrambled |
+| response | yes or no |
+| responseWalker | 1 = yes, 0 = no |
+| correct | accuracy |
+| hit | signal correctly detected |
+| falseAlarm | yes response to scrambled stimulus |
+| miss | no response to walker stimulus |
+| correctRejection | no response to scrambled stimulus |
+| noise | number of distractor dots |
+| direction | L or R |
+| position | horizontal position |
+| RT | response time |
+| triggeredBy | HOST, CLIENT, or empty for individual |
+| timestamp | local timestamp |
+
+## Signal detection analysis
+
+Run:
+
+```matlab
+bm_compute_sdt
+```
+
+or:
+
+```matlab
+bm_compute_sdt('data/participant001_biological_motion_individual.csv')
+```
+
+The function computes hit rate, false alarm rate, d′, criterion c, accuracy, and mean RT using the loglinear correction:
+
+```text
+hitRate = (hits + 0.5) / (signalTrials + 1)
+falseAlarmRate = (falseAlarms + 0.5) / (noiseTrials + 1)
+d′ = z(hitRate) - z(falseAlarmRate)
+c = -0.5 × [z(hitRate) + z(falseAlarmRate)]
+```
+
+Higher criterion c indicates a more conservative response strategy.
+
+## References
 
 Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d′. *Behavior Research Methods, Instruments, & Computers*, 27, 46–51.
 
-Szymanek, A., Senderecka, M., & Hohol, M. (2026). *I see moving people: Expectations drive detection of biological motion in noisy point-light displays*. Psychonomic Bulletin & Review.
+Szymanek, A., Senderecka, M., & Hohol, M. (2026). *I see moving people: Expectations drive detection of biological motion in noisy point-light displays*. *Psychonomic Bulletin & Review*.
 
-van Elk, M. (2013). *Relevant source of biological motion stimuli used in the original task*.
+van Elk, M. (2013). Biological motion point-light display stimuli used as the basis for the task.
+
